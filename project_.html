@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎮HOW ARE YOU FEELING TODAY</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background: #0a0a0a;
+      font-family: 'Orbitron', sans-serif;
+      overflow: hidden;
+      transition: background 1s ease;
+    }
+
+    h1 {
+      font-size: 40px;
+      margin-bottom: 30px;
+      color: white;
+      text-shadow: 0 0 20px #0ff, 0 0 40px #0ff;
+    }
+
+    .mood-container {
+      display: grid;
+      grid-template-columns: repeat(3, 180px);
+      gap: 30px;
+    }
+
+    .card {
+      background: rgba(20, 20, 20, 0.7);
+      border-radius: 18px;
+      padding: 25px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      box-shadow: 0 0 15px rgba(255,255,255,0.2);
+    }
+
+    .card:hover {
+      transform: scale(1.1) rotate(-2deg);
+      box-shadow: 0 0 25px #fff;
+    }
+
+    .emoji {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .label {
+      font-weight: bold;
+      font-size: 18px;
+      color: #fff;
+      text-shadow: 0 0 8px rgba(255,255,255,0.7);
+    }
+
+    .result {
+      margin-top: 40px;
+      font-size: 22px;
+      font-weight: 600;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      border-radius: 15px;
+      min-height: 70px;
+      transition: all 0.8s ease;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      max-width: 700px;
+    }
+
+    /* Particle effect */
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    @keyframes rise {
+      from { transform: translateY(100vh) scale(0.5); opacity: 1; }
+      to { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+    }
+
+    @keyframes explode {
+      from { transform: scale(0.2); opacity: 1; }
+      to { transform: scale(2); opacity: 0; }
+    }
+
+    @keyframes drift {
+      from { transform: translateX(0) translateY(0); opacity: 1; }
+      to { transform: translateX(50px) translateY(-100vh); opacity: 0; }
+    }
+
+    /* Mood-specific styles */
+    .happy-bg { background: radial-gradient(circle at center, #ffea00, #ff7700, #0a0a0a); }
+    .sad-bg { background: radial-gradient(circle at center, #0055ff, #001133, #0a0a0a); }
+    .angry-bg { background: radial-gradient(circle at center, #ff2200, #770000, #0a0a0a); }
+    .stressed-bg { background: radial-gradient(circle at center, #aa00ff, #220044, #0a0a0a); }
+    .calm-bg { background: radial-gradient(circle at center, #00ffaa, #004433, #0a0a0a); }
+    .neutral-bg { background: radial-gradient(circle at center, #999, #222, #0a0a0a); }
+
+  </style>
+</head>
+<body>
+  <h1>🎮 MoodQuest – Unlock Your Power</h1>
+
+  <div class="mood-container">
+    <div class="card" data-mood="happy"><div class="emoji">😊</div><div class="label">Happy</div></div>
+    <div class="card" data-mood="sad"><div class="emoji">😢</div><div class="label">Sad</div></div>
+    <div class="card" data-mood="angry"><div class="emoji">😡</div><div class="label">Angry</div></div>
+    <div class="card" data-mood="stressed"><div class="emoji">😫</div><div class="label">Stressed</div></div>
+    <div class="card" data-mood="calm"><div class="emoji">😌</div><div class="label">Calm</div></div>
+    <div class="card" data-mood="neutral"><div class="emoji">😐</div><div class="label">Neutral</div></div>
+  </div>
+
+  <div class="result" id="result">⚡ Select your mood to unlock a boost ⚡</div>
+
+  <script>
+    const result = document.getElementById("result");
+    const cards = document.querySelectorAll(".card");
+    const body = document.body;
+
+    const moods = {
+      happy: { 
+        text: " Happiness is your energy bar full! Share it and power-up others.",
+        bg: "happy-bg", anim: "rise"
+      },
+      sad: { 
+        text: " Sadness is part of the story. Even heroes pause before their next quest.",
+        bg: "sad-bg", anim: "drift"
+      },
+      angry: { 
+        text: " Anger is raw fuel. Channel it, focus it, and you’ll break all barriers.",
+        bg: "angry-bg", anim: "explode"
+      },
+      stressed: { 
+        text: " Stress means you’ve been grinding hard. Rest, recover, then respawn stronger.",
+        bg: "stressed-bg", anim: "drift"
+      },
+      calm: { 
+        text: " Calm is the ultimate cheat code. Stay steady, dodge chaos, and win big.",
+        bg: "calm-bg", anim: "rise"
+      },
+      neutral: { 
+        text: " Balance is the key to mastery. From balance, all paths open.",
+        bg: "neutral-bg", anim: "rise"
+      }
+    };
+
+    cards.forEach(card => {
+      card.addEventListener("click", () => {
+        const mood = card.dataset.mood;
+        const moodData = moods[mood];
+
+        // Background change
+        body.className = moodData.bg;
+
+        // Text with typewriter
+        typeWriter(moodData.text, result);
+
+        // Particles with mood-based animation
+        spawnParticles(moodData.anim);
+      });
+    });
+
+    function typeWriter(text, element) {
+      let i = 0;
+      element.textContent = "";
+      const interval = setInterval(() => {
+        element.textContent += text.charAt(i);
+        i++;
+        if (i > text.length) clearInterval(interval);
+      }, 30);
+    }
+
+    function spawnParticles(animationType) {
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement("div");
+        particle.className = "particle";
+        particle.style.left = Math.random() * window.innerWidth + "px";
+        particle.style.top = Math.random() * window.innerHeight + "px";
+        particle.style.width = particle.style.height = 5 + Math.random() * 15 + "px";
+        particle.style.background = "white";
+        particle.style.animation = `${animationType} ${2 + Math.random()*4}s linear forwards`;
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 6000);
+      }
+    }
+  </script>
+</body>
+</html>
